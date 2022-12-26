@@ -1,0 +1,134 @@
+buildscript {
+    ext.kotlin_version = '1.7.21'
+    repositories {
+        jcenter()
+        maven {
+            name = "forge"
+            url = "https://maven.minecraftforge.net/"
+        }
+        maven {
+            name = "jitpack"
+            url = "https://jitpack.io/"
+        }
+        mavenCentral()
+        maven { url = "https://repo.spongepowered.org/maven" }
+    }
+    dependencies {
+        classpath "com.github.debuggingss:ForgeGradle:FG_2.1-SNAPSHOT"
+        classpath 'com.github.LxGaming:MixinGradle:d75e32e'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:6.1.0'
+    }
+}
+
+plugins {
+    id "org.jetbrains.kotlin.jvm" version "1.7.21"
+}
+
+apply plugin: 'java'
+apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'org.spongepowered.mixin'
+apply plugin: 'com.github.johnrengelman.shadow'
+compileJava.options.encoding = 'UTF-8'
+
+version = "1.0"
+group = "net.bruhitsalex.kotlinforge"
+archivesBaseName = "KotlinForge"
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+minecraft {
+    version = "1.8.9-11.15.1.2318-1.8.9"
+    runDir = "run"
+    mappings = "stable_20"
+    makeObfSourceJar = false
+}
+
+repositories {
+    flatDir {
+        dirs 'libraries'
+    }
+    jcenter()
+    maven { url 'https://repo.spongepowered.org/maven/' }
+    maven {
+        url 'https://repo.maven.apache.org/maven2'
+        name 'Maven Central'
+    }
+    maven { url 'https://jitpack.io' }
+    mavenCentral()
+}
+
+dependencies {
+    implementation('org.spongepowered:mixin:0.7.11-SNAPSHOT')
+    annotationProcessor('org.spongepowered:mixin:0.7.11-SNAPSHOT')
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+}
+
+jar {
+    manifest.attributes(
+            'TweakClass': 'org.spongepowered.asm.launch.MixinTweaker',
+            'MixinConfigs': "mixins.kotlinforge.json",
+            'TweakOrder': '0',
+            'ModSide': 'CLIENT',
+            'FMLCorePluginContainsFMLMod': true,
+            "ForceLoadAsMod": true
+    )
+}
+
+mixin {
+    add sourceSets.main, "mixins.kotlinforge.refmap.json"
+}
+
+shadowJar {
+    zip64 true
+    dependencies {
+        include(dependency('org.spongepowered:mixin:0.7.11-SNAPSHOT'))
+
+        // Include all kotlin runtime dependencies
+        include(dependency('org.jetbrains.kotlin:kotlin-stdlib:1.7.21'))
+        include(dependency('org.jetbrains.kotlin:kotlin-stdlib-common:1.7.21'))
+        include(dependency('org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.21'))
+        include(dependency('org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.7.21'))
+        include(dependency('org.jetbrains:annotations:13.0'))
+        include(dependency("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.6.4"))
+    }
+
+    exclude "dummyThing"
+    exclude "LICENCE.txt"
+    exclude "META-INF/maven/**"
+    exclude "META-INF/LICENCE.txt"
+    exclude "META-INF/NOTICE.txt"
+}
+
+reobf {
+    shadowJar {
+        mappingType = 'SEARGE' // SEARGE, NOTCH
+    }
+}
+
+processResources {
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+        expand 'version':project.version, 'mcversion':project.minecraft.version
+    }
+
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
