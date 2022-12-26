@@ -9,6 +9,7 @@ Given it's currently called KotlinForge, and you want to change it to `Definatel
 1. Rename the package `net.bruhitsalex.kotlinforge` folder to `net.myname.definatelynotcheat`
 2. Rename the `KotlinForge` class to `DefinatelyNotCheat`
 3. Rename the `mixins.kotlinforge.json` file in your resources folder to `mixins.definatelynotcheat.json`
+4. In the `mixins.definatelynotcheat.json` file, fix `package` to `net.myname.definatelynotcheat.mixins` and `refmap` to `mixins.definatelynotcheat.refmap.json`
 4. In build.gradle change the `group` to `net.myname.definatelynotcheat`
 5. In build.gradle change the `archivesBaseName` to `DefinatelyNotCheat`
 6. In build.gradle, change all mentions of `KotlinForge` to `DefinatelyNotCheat`, especially in `jar {` and `mixin {`
